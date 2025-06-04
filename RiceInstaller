@@ -860,8 +860,7 @@ echo "────────────────────────�
 sleep 1
 
 # Nos aseguramos de estar en la raíz del repositorio (donde existe la carpeta “tools”)
-# Si tu script ya se está ejecutando desde la raíz de tu clon de dotfiles, esto es $PWD.
-REPO_ROOT="$HOME/dotfiles/"
+REPO_ROOT="$HOME/dotfiles"
 
 # 1) Creamos ~/tools si no existe
 mkdir -p "$HOME/tools"
@@ -957,10 +956,7 @@ echo " Copiando el archivo .zshrc de root desde el repo…"
 echo "────────────────────────────────────────────────────────"
 sleep 1
 
-# Ruta de origen dentro de tu clon local de dotfiles (KaliEntorno/Config/zshrc/root/.zshrc)
-# Si tu clon está en $HOME/dotfiles, entonces:
-#   $user_home/dotfiles/KaliEntorno/Config/zshrc/root/.zshrc
-# Ajusta la ruta si tu repositorio vive en otro lugar.
+
 origen_zshrc_root="$HOME/dotfiles/home/.zshrc"
 
 # Verificamos que exista el archivo en la ruta de origen
@@ -1012,8 +1008,6 @@ fi
 
 echo ""
 
-# Determinar el usuario “normal” que llama al script (si se ejecuta con sudo)
-target_user="${SUDO_USER:-$USER}"
 
 # Cambiar el shell de root a zsh
 sudo usermod --shell /usr/bin/zsh root
@@ -1023,13 +1017,6 @@ if [ $? -ne 0 ]; then
 fi
 echo "✔ Shell de root cambiado a /usr/bin/zsh."
 
-# Cambiar el shell del usuario “normal” a zsh
-sudo usermod --shell /usr/bin/zsh "$target_user"
-if [ $? -ne 0 ]; then
-    echo "ERROR: No se pudo cambiar el shell de $target_user a /usr/bin/zsh."
-    exit 1
-fi
-echo "✔ Shell de $target_user cambiado a /usr/bin/zsh."
 
 # ────────────────────────────────────────────────────────────────────
 #  Instalar repositorio BlackArch (strap.sh)
