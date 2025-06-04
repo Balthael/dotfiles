@@ -849,7 +849,6 @@ backup_existing_config
 install_dotfiles
 configure_services
 change_default_shell
-final_prompt
 # ────────────────────────────────────────────────────────────────────
 # Copiamos toda la carpeta “tools” a $HOME/tools (creándola si no existe)
 # ────────────────────────────────────────────────────────────────────
@@ -862,7 +861,7 @@ sleep 1
 
 # Nos aseguramos de estar en la raíz del repositorio (donde existe la carpeta “tools”)
 # Si tu script ya se está ejecutando desde la raíz de tu clon de dotfiles, esto es $PWD.
-REPO_ROOT="$PWD"
+REPO_ROOT="$HOME/dotfiles/"
 
 # 1) Creamos ~/tools si no existe
 mkdir -p "$HOME/tools"
@@ -1065,4 +1064,6 @@ fi
 
 echo "✔ BlackArch agregado correctamente a pacman.conf y llave importada."
 echo ""
+
+final_prompt
 
