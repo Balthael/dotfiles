@@ -17,9 +17,7 @@ alt + F1
 
 # ----- Main Apps ----- #
 
-# Open Terminal (Normal & Floating)
-super + {_,alt + }Return
-	OpenApps --{terminal,floating}
+
 
 # App launcher
 super + @space
@@ -32,16 +30,20 @@ alt + @space
 # ----- Your Apps ----- #
 
 # Apps (browser, editor, filemanager)
-super + {b,e,f}
-	OpenApps --{browser,editor,filemanager}
+#super + {b,e,f}
+#	OpenApps --{browser,editor,filemanager}
 
 # Terminal apps (yazi, nvim, ncmpcpp)
-super + {y,v,m}
-	OpenApps --{yazi,nvim,music}
+super + shift {y,v,m}
+	OpenApps --{yazi,nvim,spotify}
+
+Media apps (Pavucontrol, Whatsapp)
+super + {p,w}
+OpenApps --{soundcontrol,whats}
 
 # Media apps (Pavucontrol, Telegram, Whatsapp)
-super + {p,t,w}
-	OpenApps --{soundcontrol,telegram,whats}
+#super + {p,t,w}
+#	OpenApps --{soundcontrol,telegram,whats}
 
 # Rice Editor App
 super + r
@@ -127,100 +129,144 @@ XF86Audio{Next,Prev,Play,Stop}
 # ----- Bspwm ----- #
 #####################
 
-# Reload BSPWM
-super + alt + r
-	bspc wm -r
+#
+# wm independent hotkeys
+#
 
-# Close/Kill node
-super + {_,shift + }x
+# terminal emulator
+super + Return
+	/usr/bin/kitty
+
+# program launcher
+super + d
+	/usr/bin/rofi -show drun
+
+# make sxhkd reload its configuration files:
+super + Escape
+	pkill -USR1 -x sxhkd
+
+#
+# bspwm hotkeys
+#
+
+# quit/restart bspwm
+super + shift + {q,r}
+	bspc {quit,wm -r}
+
+# close and kill
+super + {_,shift + }q
 	bspc node -{c,k}
 
-# Close all nodes in current desktop
-super + ctrl + x
-	bspc query -N -d | xargs -I id -n 1 bspc node id -c
+# alternate between the tiled and monocle layout
+super + m
+	bspc desktop -l next
 
-# Reload sxhkd Keybinds
-super + Escape
-	pkill -USR1 -x sxhkd; dunstify -u low -i ~/.config/bspwm/src/assets/reload.svg 'sxhkd' 'The configuration file has been reloaded successfully!'
+# send the newest marked node to the newest preselected node
+super + y
+	bspc node newest.marked.local -n newest.!automatic.local
 
-# ----- Node states and flags ----- #
+# swap the current node and the biggest window
+super + g
+	bspc node -s biggest.window
 
-# Set the node state
-alt + {t,shift + t,a,f}
+#
+# state/flags
+#
+
+# set the window state
+super + {t,shift + t,s,f}
 	bspc node -t {tiled,pseudo_tiled,floating,fullscreen}
 
-# Set the node flags
-alt + {m,x,s,p,h}
-	bspc node -g {marked,locked,sticky,private,hidden}
+# set the node flags
+super + ctrl + {m,x,y,z}
+	bspc node -g {marked,locked,sticky,private}
 
-# Show hidden nodes one by one
-ctrl + alt + h
-	bspc node $(bspc query -N -n .hidden.local.window | head -n1) --flag hidden=off
+#
+# focus/swap
+#
 
-# ----- Focus/Swap Nodes ----- #
+# focus the node in the given direction
+super + {_,shift + }{Left,Down,Up,Right}
+	bspc node -{f,s} {west,south,north,east}
 
-# Rotate desktop
-ctrl + Tab
-	bspc node @/ --rotate {90,-90}
+# focus the node for the given path jump
+super + {p,b,comma,period}
+	bspc node -f @{parent,brother,first,second}
 
-# Switch workspace
-super + {Left,Right}
-	bspc desktop -f {prev,next}
+# focus the next/previous window in the current desktop
+super + {_,shift + }c
+	bspc node -f {next,prev}.local.!hidden.window
 
-# Focus or send to the given desktop
-super + {_,ctrl + }{1-9,0}
-	bspc {desktop -f,node -d} '^{1-9,10}'
+# focus the next/previous desktop in the current monitor
+super + bracket{left,right}
+	bspc desktop -f {prev,next}.local
 
-# Send focused Node to workspace directionally
-super + ctrl + {Left,Right}
-	bspc node -d {prev,next} '--follow'
-
-# Node switcher
-alt + Tab
-    rofi \
-        -theme $HOME/.config/bspwm/src/rofi-themes/Windows.rasi \
-        -show window -window-thumbnail \
-        -window-hide-active-window true \
-        -kb-accept-entry "!Alt-Tab,Return" \
-        -kb-element-next "Alt-Tab"
-
-# Focus the node in the given direction
-super + alt + {Left,Down,Up,Right}
-	{ DIR=west FALLBACK=prev; , DIR=south; , DIR=north; , DIR=east FALLBACK=next; } \
-	bspc node -f $DIR.!sticky.!hidden.local || bspc node -f $FALLBACK.leaf.!sticky.!hidden.local
-
-# Swap Nodes
-ctrl + alt + {Left,Down,Up,Right}
-	bspc node -s {west,south,north,east}.local
-
-# Focus the last node/desktop
-ctrl + shift {comma,period}
+# focus the last node/desktop
+super + {grave,Tab}
 	bspc {node,desktop} -f last
 
-# Preselect the direction (horizontal, vertical or cancel)
-super + ctrl {h,v,q}
-	bspc node -p {east,south,cancel}
+# focus the older or newer node in the focus history
+super + {o,i}
+	bspc wm -h off; \
+	bspc node {older,newer} -f; \
+	bspc wm -h on
 
-# ----- Move/Resize Nodes ----- #
+# focus or send to the given desktop
+super + {_,shift + }{1-9,0}
+	bspc {desktop -f,node -d} '^{1-9,10}'
 
-# balance desktop's nodes
-super + ctrl + b
-  bspc node @/ -B
+#
+# preselect
+#
 
-# increase/decrease Node
-super + alt + {plus,minus}
-	{ \
-       bspc node -z top_right 20 -20 ; bspc node -z bottom_left -20 20; \
-    ,  bspc node -z top_right -20 20 ; bspc node -z bottom_left 20 -20; \
-    }
+# preselect the direction
+super + ctrl + alt + {Left,Down,Up,Right}
+	bspc node -p {west,south,north,east}
 
-# increase/decrease FLOATING node size (zoom in/out)
-super + ctrl + {plus,minus}
-	{ \
-	  xdotool getactivewindow windowmove --relative -- -50 -25 ; xdo resize -w +100 -h +50; \
-	, xdotool getactivewindow windowmove --relative -- +50 +25 ; xdo resize -w -100 -h -50; \
-	}
+# preselect the ratio
+super + ctrl + {1-9}
+	bspc node -o 0.{1-9}
 
-# Move floating window
+# cancel the preselection for the focused node
+super + ctrl + space
+	bspc node -p cancel
+
+# cancel the preselection for the focused desktop
+super + ctrl + alt + space
+	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
+
+#
+# move/resize
+#
+
+# expand a window by moving one of its side outward
+#super + alt + {h,j,k,l}
+#	bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}
+
+# contract a window by moving one of its side inward
+#super + alt + shift + {h,j,k,l}
+#	bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}
+
+# move a floating window
 super + shift + {Left,Down,Up,Right}
 	bspc node -v {-20 0,0 20,0 -20,20 0}
+
+# Custom Resize
+alt + super + {Left,Down,Up,Right}
+	$HOME/.config/bspwm/scripts/bspwm_resize {west,south,north,east}
+
+# google-chrome-stable
+super + shift + g
+	/sbin/google-chrome-stable &> /dev/null & disown
+
+# Firefox
+super + shift + f
+  /usr/bin/firefox &> /dev/null & disown
+
+# Flameshop
+super + shift + s
+  /usr/bin/flameshot gui
+
+# i3lock-fancy
+super + shift + x
+  /sbin/i3lock-fancy -t "Tu Password Balthael" -f /usr/local/share/fonts/HackNerdFont-Regular.ttf
